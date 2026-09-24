@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Quit Habit Tracker</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--accent:#111827;--soft:#eef2ff;--good:#15803d;--bad:#b91c1c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select{font:inherit}button{cursor:pointer}.wrap{max-width:760px;margin:auto;padding:18px 16px 40px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.brand{font-weight:800;font-size:21px}.user{font-size:12px;color:var(--muted)}
+nav{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:18px}nav button{border:0;background:transparent;padding:11px 5px;border-radius:12px;color:var(--muted)}nav button.active{background:var(--card);color:var(--text);font-weight:700;box-shadow:0 2px 12px #00000008}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;margin-bottom:14px}.hero{text-align:center;padding:26px 18px}.habit-title{font-size:14px;color:var(--muted)}h1{font-size:27px;margin:5px 0 7px}h2{font-size:18px;margin:0 0 12px}.count{font-size:72px;font-weight:850;line-height:1;margin:20px 0}
+.primary{width:190px;height:190px;border-radius:50%;border:0;background:var(--accent);color:#fff;font-weight:800;font-size:21px;box-shadow:0 12px 30px #11182720}.primary:active{transform:scale(.97)}
+.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px}.btn{border:1px solid var(--line);background:#fff;border-radius:12px;padding:11px 15px}.good{color:var(--good)}.bad{color:var(--bad)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat{background:#f8fafc;border-radius:14px;padding:13px;text-align:center}.stat b{display:block;font-size:22px}.stat span{font-size:12px;color:var(--muted)}
+form{display:grid;gap:10px}label{font-size:13px;font-weight:650}input,select{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--text)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.hidden{display:none!important}.muted{color:var(--muted)}.center{text-align:center}.empty{padding:30px;text-align:center;color:var(--muted)}
+table{width:100%;border-collapse:collapse}td{padding:10px 5px;border-bottom:1px solid var(--line);font-size:14px}.bar{height:10px;background:#eef2f7;border-radius:99px;overflow:hidden}.bar>i{display:block;height:100%;background:#111827;border-radius:99px}
+.notice{font-size:12px;color:var(--muted);padding:10px 0}.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#111827;color:#fff;padding:11px 16px;border-radius:12px;font-size:13px;display:none;z-index:10}
+@media(max-width:500px){.grid{grid-template-columns:1fr 1fr}.grid .stat:last-child{grid-column:1/-1}.row{grid-template-columns:1fr}header{align-items:flex-start}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><div class="brand">Quit Habit Tracker</div><div id="user" class="user">Not signed in</div></header>
+
+<section id="auth" class="card">
+<h2>Private habit tracking</h2>
+<p class="muted">Sign in to sync your habits and history online.</p>
+<form id="authForm">
+<input id="email" type="email" placeholder="Email" required>
+<input id="password" type="password" placeholder="Password (6+ characters)" minlength="6" required>
+<div class="actions"><button class="btn" type="submit">Sign in</button><button class="btn" id="signup" type="button">Create account</button></div>
+</form>
+<div class="notice">The app needs your Supabase project URL and anon key in <code>app.js</code> before online sync can work.</div>
+</section>
+
+<div id="app" class="hidden">
+<nav>
+<button class="active" data-tab="today">Today</button>
+<button data-tab="progress">Progress</button>
+<button data-tab="history">History</button>
+<button data-tab="settings">Habits</button>
+</nav>
+
+<section id="today" class="tab">
+<div class="card hero">
+<div id="habitTitle" class="habit-title">No habit selected</div>
+<h1 id="habitName">Create your first habit</h1>
+<div id="count" class="count">0</div>
+<button id="urge" class="primary" type="button">I felt the urge</button>
+<div class="actions">
+<button id="resist" class="btn good" type="button">I resisted</button>
+<button id="acted" class="btn bad" type="button">I acted</button>
+</div>
+<div id="todayMsg" class="notice"></div>
+</div>
+<div class="grid">
+<div class="stat"><b id="uCount">0</b><span>Urges today</span></div>
+<div class="stat"><b id="rCount">0</b><span>Resisted</span></div>
+<div class="stat"><b id="aCount">0</b><span>Acted</span></div>
+</div>
+</section>
+
+<section id="progress" class="tab hidden">
+<div class="card"><h2>Last 14 days</h2><div id="chart"></div></div>
+<div class="card"><h2>Summary</h2><div id="summary"></div></div>
+</section>
+
+<section id="history" class="tab hidden">
+<div class="card"><h2>Recent activity</h2><div id="historyList"></div></div>
+</section>
+
+<section id="settings" class="tab hidden">
+<div class="card">
+<h2>Add a habit</h2>
+<form id="habitForm">
+<input id="newHabit" placeholder="e.g. Checking WhatsApp DP" maxlength="80" required>
+<div class="actions"><button class="btn" type="submit">Add habit</button></div>
+</form>
+</div>
+<div class="card"><h2>Your habits</h2><div id="habitList"></div></div>
+<div class="card"><h2>Account</h2><button id="logout" class="btn" type="button">Sign out</button></div>
+</section>
+</div>
+</div>
+<div id="toast" class="toast"></div>
+<script type="module" src="app.js"></script>
+</body>
+</html>
