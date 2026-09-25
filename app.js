@@ -196,6 +196,7 @@ function render(){
   $("pCount").textContent=c.p;
 
   $("pendingBox").classList.toggle("hidden",!p);
+  if(!p)endConfirm();
   $("urge").disabled=S.busy||!h||!!p;
   $("resist").disabled=$("acted").disabled=S.busy||!p;
 
@@ -456,19 +457,109 @@ function closeDistract(){
 $("openDistract").onclick=openDistract;
 $("closeDistract").onclick=closeDistract;
 
-$("tabBreathe").onclick=()=>{
-  $("tabBreathe").classList.add("active");
-  $("tabBubbles").classList.remove("active");
-  $("breatheView").classList.remove("hidden");
-  $("bubbleView").classList.add("hidden")
+document.querySelectorAll(".modalTab").forEach(tab=>
+  tab.onclick=()=>{
+    document.querySelectorAll(".modalTab").forEach(t=>t.classList.remove("active"));
+    document.querySelectorAll(".distractView").forEach(v=>v.classList.add("hidden"));
+    tab.classList.add("active");
+    $(tab.dataset.view).classList.remove("hidden");
+
+    if(tab.dataset.view==="puzzleView")newPuzzleRound();
+    if(tab.dataset.view==="groundView")renderGround()
+  }
+);
+
+// --- color-match puzzle ---
+let puzzle={score:0};
+const SWATCHES=[
+  {name:"Red",hex:"#c0453a"},{name:"Blue",hex:"#3a5fc0"},
+  {name:"Green",hex:"#3f8a5e"},{name:"Yellow",hex:"#d1a02e"},
+  {name:"Purple",hex:"#7a4fb0"},{name:"Orange",hex:"#d1752e"}
+];
+
+function newPuzzleRound(){
+  let pick=arr=>arr[Math.floor(Math.random()*arr.length)];
+  let target=pick(SWATCHES);
+  let others=SWATCHES.filter(s=>s.name!==target.name)
+    .sort(()=>Math.random()-.5).slice(0,3);
+  let opts=[target,...others].sort(()=>Math.random()-.5);
+
+  $("puzzleTarget").textContent=target.name;
+
+  $("puzzleGrid").innerHTML=opts.map(o=>
+    `<button class="swatch" style="background:${o.hex}" data-name="${o.name}" aria-label="${o.name}"></button>`
+  ).join("");
+
+  document.querySelectorAll(".swatch").forEach(b=>
+    b.onclick=()=>{
+      if(b.dataset.name===target.name){
+        puzzle.score++;
+        $("puzzleScore").textContent=puzzle.score
+      }
+      newPuzzleRound()
+    }
+  )
+}
+
+// --- grounding exercise (5-4-3-2-1 style) ---
+let ground={i:0};
+const GROUND_STEPS=[
+  "Name 3 things you can see around you",
+  "Name 2 things you can hear right now",
+  "Name 1 thing you can feel (your feet on the floor, the chair, anything)",
+  "Take one slow breath in, and let it out slowly",
+  "Notice: the urge is still just a feeling passing through"
+];
+
+function renderGround(){
+  $("groundCount").textContent=`STEP ${ground.i+1} OF ${GROUND_STEPS.length}`;
+  $("groundPrompt").textContent=GROUND_STEPS[ground.i]
+}
+
+$("groundNext").onclick=()=>{
+  ground.i=(ground.i+1)%GROUND_STEPS.length;
+  renderGround()
 };
 
-$("tabBubbles").onclick=()=>{
-  $("tabBubbles").classList.add("active");
-  $("tabBreathe").classList.remove("active");
-  $("bubbleView").classList.remove("hidden");
-  $("breatheView").classList.add("hidden")
-};
+// --- confirm delay before logging resisted / acted ---
+let confirmState={type:null,timer:null,seconds:0};
+
+function startConfirm(x){
+  if(S.busy||!pendingEvent())return;
+
+  confirmState.type=x;
+  confirmState.seconds=4;
+
+  $("pendingActions").classList.add("hidden");
+  $("openDistract").classList.add("hidden");
+  $("confirmBox").classList.remove("hidden");
+
+  updateConfirmText();
+
+  confirmState.timer=setInterval(()=>{
+    confirmState.seconds--;
+    if(confirmState.seconds<=0){
+      let x2=confirmState.type;
+      endConfirm();
+      outcome(x2)
+    }else updateConfirmText()
+  },1000)
+}
+
+function updateConfirmText(){
+  let label=confirmState.type==="resisted"?"Resisted":"Acted";
+  $("confirmText").textContent=`Logging "${label}" in ${confirmState.seconds}s…`
+}
+
+function endConfirm(){
+  clearInterval(confirmState.timer);
+  confirmState.type=null;
+  $("confirmBox").classList.add("hidden");
+  $("pendingActions").classList.remove("hidden");
+  $("openDistract").classList.remove("hidden")
+}
+
+$("cancelConfirm").onclick=endConfirm;
 
 $("authForm").onsubmit=async e=>{
   e.preventDefault();
@@ -492,8 +583,8 @@ $("signup").onclick=async()=>{
 };
 
 $("urge").onclick=urge;
-$("resist").onclick=()=>outcome("resisted");
-$("acted").onclick=()=>outcome("acted");
+$("resist").onclick=()=>startConfirm("resisted");
+$("acted").onclick=()=>startConfirm("acted");
 $("exportCsv").onclick=exportCsv;
 
 $("habitForm").onsubmit=async e=>{

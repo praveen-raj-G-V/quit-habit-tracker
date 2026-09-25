@@ -72,6 +72,7 @@ select.habitSelect{
 .pending b{font-size:14px}
 .noteInput{width:100%;margin-top:10px;padding:10px 11px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--card);color:var(--ink);font:inherit;font-size:13px;resize:vertical;min-height:38px}
 .actions{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:12px}
+.confirmBox{text-align:center;margin-top:12px;padding:12px;background:var(--amber-bg);border-radius:var(--radius-sm)}
 .btn{border:1px solid var(--line);background:var(--card);border-radius:var(--radius-sm);padding:10px 16px;color:var(--ink);font:inherit;font-weight:600;font-size:13.5px;cursor:pointer}
 .btn:disabled{opacity:.35;cursor:not-allowed}
 .btn.good{border-color:color-mix(in srgb,var(--sage) 45%,var(--line));color:var(--sage)}
@@ -136,8 +137,8 @@ h2{font-family:var(--serif);font-weight:600;font-size:17px;margin:0 0 12px}
 }
 @media(min-width:520px){.modalCard{border-radius:var(--radius-lg)}}
 .modalTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
-.modalTabs{display:flex;gap:6px;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:3px}
-.modalTab{border:0;background:transparent;padding:7px 14px;border-radius:999px;font:inherit;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer}
+.modalTabs{display:flex;gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:3px;flex-wrap:wrap}
+.modalTab{border:0;background:transparent;padding:7px 11px;border-radius:999px;font:inherit;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
 .modalTab.active{background:var(--ink);color:var(--bg)}
 .distractTimer{font-family:var(--serif);font-size:17px;font-weight:600;color:var(--amber)}
 .distractView{min-height:260px;display:flex;flex-direction:column;align-items:center;justify-content:center}
@@ -165,6 +166,14 @@ h2{font-family:var(--serif);font-weight:600;font-size:17px;margin:0 0 12px}
 }
 .bubble:active{transform:scale(.85)}
 @keyframes pop-in{from{transform:scale(0)}to{transform:scale(1)}}
+
+.puzzleTarget{font-family:var(--serif);font-size:26px;font-weight:600;margin:18px 0 22px;text-align:center}
+.puzzleGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:280px}
+.swatch{height:64px;border-radius:var(--radius-md);border:0;cursor:pointer;transition:transform .1s ease}
+.swatch:active{transform:scale(.94)}
+
+.groundStep{text-align:center;max-width:320px}
+.groundPrompt{font-family:var(--serif);font-size:21px;font-weight:600;margin-top:10px;line-height:1.4}
 
 @media(max-width:480px){
   .grid{grid-template-columns:1fr 1fr}
@@ -220,9 +229,13 @@ h2{font-family:var(--serif);font-weight:600;font-size:17px;margin:0 0 12px}
         <b>What happened next?</b>
         <div class="small muted">Choose the outcome for your latest urge.</div>
         <textarea id="note" class="noteInput" maxlength="200" rows="1" placeholder="Optional note — what triggered it?"></textarea>
-        <div class="actions">
+        <div id="pendingActions" class="actions">
           <button id="resist" class="btn good">I resisted</button>
           <button id="acted" class="btn bad">I acted</button>
+        </div>
+        <div id="confirmBox" class="confirmBox hidden">
+          <div id="confirmText" class="small" style="font-weight:600"></div>
+          <button id="cancelConfirm" class="btn ghost" style="margin-top:8px">Cancel</button>
         </div>
         <button id="openDistract" class="btn ghost" style="margin-top:10px;width:100%">Need a minute? Try a distraction</button>
       </div>
@@ -287,8 +300,10 @@ h2{font-family:var(--serif);font-weight:600;font-size:17px;margin:0 0 12px}
   <div class="modalCard">
     <div class="modalTop">
       <div class="modalTabs">
-        <button id="tabBreathe" class="modalTab active">Breathe</button>
-        <button id="tabBubbles" class="modalTab">Bubbles</button>
+        <button data-view="breatheView" class="modalTab active">Breathe</button>
+        <button data-view="bubbleView" class="modalTab">Bubbles</button>
+        <button data-view="puzzleView" class="modalTab">Puzzle</button>
+        <button data-view="groundView" class="modalTab">Ground</button>
       </div>
       <div id="distractTimer" class="distractTimer">0:60</div>
     </div>
@@ -306,6 +321,23 @@ h2{font-family:var(--serif);font-weight:600;font-size:17px;margin:0 0 12px}
         <span id="bubbleScore" class="bubbleScore">0</span>
       </div>
       <div id="bubbleArea" class="bubbleArea"></div>
+    </div>
+
+    <div id="puzzleView" class="distractView hidden">
+      <div class="bubbleTop">
+        <span class="small muted">Tap the matching color</span>
+        <span id="puzzleScore" class="bubbleScore">0</span>
+      </div>
+      <div id="puzzleTarget" class="puzzleTarget"></div>
+      <div id="puzzleGrid" class="puzzleGrid"></div>
+    </div>
+
+    <div id="groundView" class="distractView hidden">
+      <div class="groundStep">
+        <div id="groundCount" class="eyebrow">STEP 1 OF 5</div>
+        <div id="groundPrompt" class="groundPrompt"></div>
+      </div>
+      <button id="groundNext" class="btn" style="margin-top:16px">Next</button>
     </div>
 
     <button id="closeDistract" class="btn" style="width:100%;margin-top:14px">I'm ready — back to check-in</button>
