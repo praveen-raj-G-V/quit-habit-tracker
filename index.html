@@ -1,17 +1,246 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#111827"><link rel="manifest" href="manifest.webmanifest"><title>Quit Habit Tracker</title>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#1c2620" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Quit Habit Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f6f7fb;--card:#fff;--text:#111827;--muted:#667085;--line:#e6e8ee;--good:#15803d;--bad:#b42318}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif}.wrap{max-width:820px;margin:auto;padding:16px}.brand{font-size:20px;font-weight:850}header{display:flex;justify-content:space-between;margin-bottom:14px}.muted,.small{color:var(--muted);font-size:12px}
-nav{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;background:#eceff4;padding:5px;border-radius:15px;margin-bottom:15px}nav button,.btn{border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px;color:var(--text)}nav button.active{font-weight:700}
-.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;margin-bottom:13px}.hero{text-align:center}.habit{font-size:25px;font-weight:850}.count{font-size:76px;font-weight:900;margin:18px}.primary{width:180px;height:180px;border-radius:50%;border:0;background:#111827;color:#fff;font-size:20px;font-weight:800}.actions{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:15px}.good{color:var(--good)}.bad{color:var(--bad)}button:disabled{opacity:.35;cursor:not-allowed}.pending{margin:18px auto 0;max-width:420px;background:#fff8e8;border:1px solid #f4dfad;border-radius:14px;padding:12px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.stat{background:#fff;border:1px solid var(--line);border-radius:15px;padding:12px;text-align:center}.stat b{display:block;font-size:22px}.stat span{font-size:10px;color:var(--muted)}.hidden{display:none!important}.event{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);font-size:13px}.pill{font-size:10px;padding:4px 7px;border-radius:99px;background:#f2f4f7}.pill.good{background:#ecfdf3}.pill.bad{background:#fef3f2}.pill.pending{background:#fff8e8;color:#9a6700;border:0;margin:0}form{display:grid;gap:10px}input,select{padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--text);font:inherit}.habitSelect{width:100%;max-width:520px;margin:8px auto 6px;display:block;font-weight:650}.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px}.kpi{background:#f1f5f9;border-radius:14px;padding:13px}.kpi b{font-size:23px;display:block}.chart{overflow:auto}.chart svg{min-width:620px;width:100%;height:220px}.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.habitrow{padding:12px 0;border-bottom:1px solid var(--line)}.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:11px 15px;border-radius:12px;display:none}@media(max-width:520px){.grid{grid-template-columns:1fr 1fr}.row{grid-template-columns:1fr}}
-</style></head><body><div class="wrap">
-<header><div class="brand">Quit Habit Tracker</div><div id="user" class="small">Not signed in</div></header>
-<section id="auth" class="card"><h2>Private habit tracking</h2><p class="muted">Sign in to sync your progress online.</p><form id="authForm"><input id="email" type="email" placeholder="Email" required><input id="password" type="password" minlength="6" placeholder="Password" required><div class="actions"><button class="btn">Sign in</button><button id="signup" class="btn" type="button">Create account</button></div></form></section>
-<div id="app" class="hidden"><nav><button class="active" data-tab="today">Today</button><button data-tab="progress">Progress</button><button data-tab="history">History</button><button data-tab="settings">Habits</button></nav>
-<section id="today" class="tab"><div class="card hero"><div class="small">TRACKING HABIT</div><select id="habitSelect" class="habitSelect" aria-label="Select habit"></select><div class="small muted" style="padding-bottom:4px">Choose a habit to track</div><div id="habitName" class="habit">Create a habit</div><div id="goalText" class="small"></div><div id="count" class="count">0</div><button id="urge" class="primary">I felt the urge</button>
-<div id="pendingBox" class="pending hidden"><b>What happened next?</b><div class="small">Choose the outcome for your latest urge.</div><div class="actions"><button id="resist" class="btn good" disabled>✓ I resisted</button><button id="acted" class="btn bad" disabled>I acted</button></div></div>
-<div class="small" style="padding-top:12px">Record the urge first. Then choose what happened.</div></div>
-<div class="grid"><div class="stat"><b id="uCount">0</b><span>Urges</span></div><div class="stat"><b id="rCount">0</b><span>Resisted</span></div><div class="stat"><b id="aCount">0</b><span>Acted</span></div><div class="stat"><b id="pCount">0</b><span>Pending</span></div></div></section>
-<section id="progress" class="tab hidden"><div class="card"><h2>30-day trend</h2><div id="chart" class="chart"></div></div><div class="card"><h2>Summary</h2><div id="kpis" class="kpis"></div></div></section>
-<section id="history" class="tab hidden"><div class="card"><h2>Recent activity</h2><div id="historyList"></div></div></section>
-<section id="settings" class="tab hidden"><div class="card"><h2>Add a habit</h2><form id="habitForm"><input id="newHabit" maxlength="80" placeholder="e.g. Checking WhatsApp DP" required><input id="goal" type="number" min="0" max="999" placeholder="Daily urge goal (optional)"><button class="btn">Add habit</button></form></div><div class="card"><h2>Your habits</h2><div id="habitList"></div></div><div class="card"><button id="logout" class="btn">Sign out</button></div></section></div></div><div id="toast" class="toast"></div><script type="module" src="app.js"></script></body></html>
+:root{
+  --bg:#f7f5f0; --card:#ffffff; --ink:#1f2a24; --muted:#6b7268; --line:#e7e2d8;
+  --sage:#3f6b52; --sage-bg:#e9f1ea; --amber:#b8791f; --amber-bg:#fbf0dd;
+  --clay:#a3453a; --clay-bg:#fbeae7; --ring:#3f6b52;
+  --radius-lg:22px; --radius-md:14px; --radius-sm:9px;
+  --serif:'Source Serif 4',Georgia,serif; --sans:'Inter',system-ui,sans-serif;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#14181a; --card:#1b211f; --ink:#eef0ea; --muted:#98a196; --line:#2a322d;
+    --sage:#6fae8b; --sage-bg:#1c2b22; --amber:#e0a24e; --amber-bg:#2c2419;
+    --clay:#e0796c; --clay-bg:#2e1e1b; --ring:#6fae8b;
+  }
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  -webkit-font-smoothing:antialiased;
+}
+:focus-visible{outline:2px solid var(--ring);outline-offset:2px}
+.wrap{max-width:760px;margin:auto;padding:20px 18px 60px}
+
+header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px;padding-top:6px}
+.brand{font-family:var(--serif);font-size:22px;font-weight:600;letter-spacing:-.01em}
+#user{color:var(--muted);font-size:12.5px}
+
+nav{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:var(--card);border:1px solid var(--line);padding:4px;border-radius:999px;margin-bottom:20px}
+nav button{border:0;background:transparent;border-radius:999px;padding:9px 6px;color:var(--muted);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+nav button.active{background:var(--ink);color:var(--bg)}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);padding:22px;margin-bottom:14px}
+.muted{color:var(--muted)}
+.small{font-size:12.5px}
+
+/* --- Today / hero --- */
+.hero{text-align:center;padding:26px 20px 24px}
+.eyebrow{font-size:11.5px;color:var(--muted);letter-spacing:.02em}
+select.habitSelect{
+  width:100%;max-width:440px;margin:10px auto 2px;display:block;font:inherit;font-weight:600;font-size:15px;
+  padding:10px 12px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--card);color:var(--ink);
+}
+.habitName{font-family:var(--serif);font-size:24px;font-weight:600;margin-top:14px}
+.goalText{font-size:12.5px;color:var(--muted);margin-top:3px;min-height:16px}
+.streakLine{margin-top:10px;font-size:13px;color:var(--sage);font-weight:600;min-height:18px}
+.count{font-family:var(--serif);font-size:82px;font-weight:600;line-height:1;margin:16px 0 4px}
+.countLabel{font-size:11.5px;color:var(--muted);margin-bottom:18px}
+
+.primary{
+  width:172px;height:172px;border-radius:50%;border:0;background:var(--amber);color:#fff;
+  font:inherit;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 10px 26px -12px rgba(184,121,31,.55);
+  transition:transform .12s ease;
+}
+.primary:active{transform:scale(.97)}
+.primary:disabled{opacity:.4;box-shadow:none;cursor:not-allowed}
+
+.pending{margin:20px auto 0;max-width:440px;background:var(--amber-bg);border:1px solid color-mix(in srgb,var(--amber) 35%,var(--line));border-radius:var(--radius-md);padding:16px}
+.pending b{font-size:14px}
+.noteInput{width:100%;margin-top:10px;padding:10px 11px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--card);color:var(--ink);font:inherit;font-size:13px;resize:vertical;min-height:38px}
+.actions{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:12px}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:var(--radius-sm);padding:10px 16px;color:var(--ink);font:inherit;font-weight:600;font-size:13.5px;cursor:pointer}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn.good{border-color:color-mix(in srgb,var(--sage) 45%,var(--line));color:var(--sage)}
+.btn.bad{border-color:color-mix(in srgb,var(--clay) 45%,var(--line));color:var(--clay)}
+.btn.ghost{background:transparent}
+.hint{padding-top:14px}
+
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-md);padding:14px 8px;text-align:center}
+.stat b{display:block;font-family:var(--serif);font-size:24px;font-weight:600}
+.stat span{font-size:10.5px;color:var(--muted)}
+
+.hidden{display:none!important}
+
+/* --- history --- */
+.event{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.event:last-child{border-bottom:0}
+.eventMain{display:flex;flex-direction:column;gap:2px;min-width:0}
+.eventNote{color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:260px}
+.pill{font-size:11px;padding:4px 9px;border-radius:999px;background:var(--line);font-weight:600;white-space:nowrap}
+.pill.good{background:var(--sage-bg);color:var(--sage)}
+.pill.bad{background:var(--clay-bg);color:var(--clay)}
+.pill.pending{background:var(--amber-bg);color:var(--amber)}
+.eventTime{color:var(--muted);font-size:11.5px;white-space:nowrap}
+
+/* --- settings/forms --- */
+form{display:grid;gap:10px}
+input,select,textarea{padding:11px 12px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--card);color:var(--ink);font:inherit;font-size:14px}
+.habitrow{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);gap:8px}
+.habitrow:last-child{border-bottom:0}
+.habitrow .nameBtn{border:0;background:transparent;color:var(--ink);font:inherit;font-weight:600;font-size:14px;text-align:left;cursor:pointer;padding:4px 0}
+.habitrow .rowActions{display:flex;gap:6px}
+.iconBtn{border:1px solid var(--line);background:var(--card);border-radius:var(--radius-sm);padding:6px 10px;font-size:12px;color:var(--muted);cursor:pointer}
+
+/* --- progress --- */
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kpi{background:var(--bg);border:1px solid var(--line);border-radius:var(--radius-md);padding:14px}
+.kpi b{font-family:var(--serif);font-size:25px;display:block;font-weight:600}
+.kpi span{font-size:11.5px;color:var(--muted)}
+.chart{overflow:auto}
+.chart svg{min-width:640px;width:100%;height:230px}
+.legend{display:flex;gap:16px;font-size:12px;color:var(--muted);margin-top:8px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+
+.toast{
+  position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);
+  background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:var(--radius-sm);display:none;font-size:13.5px;font-weight:600;
+  max-width:90vw;
+}
+h2{font-family:var(--serif);font-weight:600;font-size:17px;margin:0 0 12px}
+
+@media(max-width:480px){
+  .grid{grid-template-columns:1fr 1fr}
+  .primary{width:150px;height:150px;font-size:15px}
+  .count{font-size:66px}
+  .eventNote{max-width:150px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="brand">Quit Habit</div>
+  <div id="user" class="small">Not signed in</div>
+</header>
+
+<section id="auth" class="card">
+  <h2>Private habit tracking</h2>
+  <p class="muted small">Sign in to sync your progress online. Nobody else can see your data.</p>
+  <form id="authForm">
+    <input id="email" type="email" placeholder="Email" autocomplete="email" required>
+    <input id="password" type="password" minlength="6" placeholder="Password" autocomplete="current-password" required>
+    <div class="actions">
+      <button class="btn" type="submit">Sign in</button>
+      <button id="signup" class="btn ghost" type="button">Create account</button>
+    </div>
+  </form>
+</section>
+
+<div id="app" class="hidden">
+  <nav>
+    <button class="active" data-tab="today">Today</button>
+    <button data-tab="progress">Progress</button>
+    <button data-tab="history">History</button>
+    <button data-tab="settings">Habits</button>
+  </nav>
+
+  <section id="today" class="tab">
+    <div class="card hero">
+      <div class="eyebrow">TRACKING</div>
+      <select id="habitSelect" class="habitSelect" aria-label="Select habit"></select>
+      <div id="habitName" class="habitName">Create a habit</div>
+      <div id="goalText" class="goalText"></div>
+      <div id="streakLine" class="streakLine"></div>
+
+      <div id="count" class="count">0</div>
+      <div class="countLabel">urges today</div>
+
+      <button id="urge" class="primary">I felt the urge</button>
+
+      <div id="pendingBox" class="pending hidden">
+        <b>What happened next?</b>
+        <div class="small muted">Choose the outcome for your latest urge.</div>
+        <textarea id="note" class="noteInput" maxlength="200" rows="1" placeholder="Optional note — what triggered it?"></textarea>
+        <div class="actions">
+          <button id="resist" class="btn good">I resisted</button>
+          <button id="acted" class="btn bad">I acted</button>
+        </div>
+      </div>
+
+      <div class="small muted hint">Record the urge first. Then choose what happened.</div>
+    </div>
+
+    <div class="grid">
+      <div class="stat"><b id="uCount">0</b><span>Urges</span></div>
+      <div class="stat"><b id="rCount">0</b><span>Resisted</span></div>
+      <div class="stat"><b id="aCount">0</b><span>Acted</span></div>
+      <div class="stat"><b id="pCount">0</b><span>Pending</span></div>
+    </div>
+  </section>
+
+  <section id="progress" class="tab hidden">
+    <div class="card">
+      <h2>30-day trend</h2>
+      <div id="chart" class="chart"></div>
+      <div class="legend">
+        <span><i class="dot" style="background:var(--sage)"></i>Resisted</span>
+        <span><i class="dot" style="background:var(--clay)"></i>Acted</span>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Summary</h2>
+      <div id="kpis" class="kpis"></div>
+    </div>
+  </section>
+
+  <section id="history" class="tab hidden">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h2 style="margin:0">Recent activity</h2>
+        <button id="exportCsv" class="iconBtn">Export CSV</button>
+      </div>
+      <div id="historyList"></div>
+    </div>
+  </section>
+
+  <section id="settings" class="tab hidden">
+    <div class="card">
+      <h2>Add a habit</h2>
+      <form id="habitForm">
+        <input id="newHabit" maxlength="80" placeholder="e.g. Checking WhatsApp DP" required>
+        <input id="goal" type="number" min="0" max="999" placeholder="Daily urge goal (optional)">
+        <button class="btn" type="submit">Add habit</button>
+      </form>
+    </div>
+    <div class="card">
+      <h2>Your habits</h2>
+      <div id="habitList"></div>
+    </div>
+    <div class="card">
+      <button id="logout" class="btn ghost">Sign out</button>
+    </div>
+  </section>
+</div>
+
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script type="module" src="app.js"></script>
+</body>
+</html>
