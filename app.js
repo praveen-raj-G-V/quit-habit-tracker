@@ -389,6 +389,87 @@ function exportCsv(){
   URL.revokeObjectURL(url)
 }
 
+// --- distraction: breathing pacer + bubble-pop mini game ---
+let distract={timer:null,secondsLeft:60,bubbleTimer:null,score:0};
+
+function openDistract(){
+  distract.secondsLeft=60;
+  distract.score=0;
+  $("bubbleScore").textContent="0";
+  $("bubbleArea").innerHTML="";
+  $("distractTimer").textContent="0:60";
+  $("distractModal").classList.remove("hidden");
+
+  breathWord();
+  distract.wordTimer=setInterval(breathWord,4000);
+
+  distract.timer=setInterval(()=>{
+    distract.secondsLeft--;
+    let m=Math.floor(distract.secondsLeft/60),sec=distract.secondsLeft%60;
+    $("distractTimer").textContent=`${m}:${String(sec).padStart(2,"0")}`;
+    if(distract.secondsLeft<=0)closeDistract()
+  },1000);
+
+  spawnBubbles()
+}
+
+function breathWord(){
+  let phase=Math.floor(Date.now()/1000)%8<4;
+  $("breathWord").textContent=phase?"Breathe in":"Breathe out"
+}
+
+function spawnBubbles(){
+  clearInterval(distract.bubbleTimer);
+
+  distract.bubbleTimer=setInterval(()=>{
+    let area=$("bubbleArea");
+    if(!area||area.children.length>6)return;
+
+    let size=30+Math.random()*34;
+    let b=document.createElement("button");
+
+    b.className="bubble";
+    b.style.width=b.style.height=`${size}px`;
+    b.style.left=`${Math.random()*(area.clientWidth-size)}px`;
+    b.style.top=`${Math.random()*(area.clientHeight-size)}px`;
+    b.setAttribute("aria-label","Pop bubble");
+
+    b.onclick=()=>{
+      distract.score++;
+      $("bubbleScore").textContent=distract.score;
+      b.remove()
+    };
+
+    area.appendChild(b);
+
+    setTimeout(()=>b.remove(),2600)
+  },550)
+}
+
+function closeDistract(){
+  clearInterval(distract.timer);
+  clearInterval(distract.wordTimer);
+  clearInterval(distract.bubbleTimer);
+  $("distractModal").classList.add("hidden")
+}
+
+$("openDistract").onclick=openDistract;
+$("closeDistract").onclick=closeDistract;
+
+$("tabBreathe").onclick=()=>{
+  $("tabBreathe").classList.add("active");
+  $("tabBubbles").classList.remove("active");
+  $("breatheView").classList.remove("hidden");
+  $("bubbleView").classList.add("hidden")
+};
+
+$("tabBubbles").onclick=()=>{
+  $("tabBubbles").classList.add("active");
+  $("tabBreathe").classList.remove("active");
+  $("bubbleView").classList.remove("hidden");
+  $("breatheView").classList.add("hidden")
+};
+
 $("authForm").onsubmit=async e=>{
   e.preventDefault();
 

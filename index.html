@@ -124,6 +124,48 @@ input,select,textarea{padding:11px 12px;border:1px solid var(--line);border-radi
 }
 h2{font-family:var(--serif);font-weight:600;font-size:17px;margin:0 0 12px}
 
+/* --- distraction modal --- */
+.modalOverlay{
+  position:fixed;inset:0;background:rgba(15,17,15,.55);display:flex;align-items:flex-end;justify-content:center;
+  z-index:50;padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media(min-width:520px){.modalOverlay{align-items:center}}
+.modalCard{
+  background:var(--card);border-radius:24px 24px 0 0;padding:20px 20px calc(18px + env(safe-area-inset-bottom,0px));
+  width:100%;max-width:480px;box-shadow:0 -12px 40px rgba(0,0,0,.2);
+}
+@media(min-width:520px){.modalCard{border-radius:var(--radius-lg)}}
+.modalTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.modalTabs{display:flex;gap:6px;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:3px}
+.modalTab{border:0;background:transparent;padding:7px 14px;border-radius:999px;font:inherit;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer}
+.modalTab.active{background:var(--ink);color:var(--bg)}
+.distractTimer{font-family:var(--serif);font-size:17px;font-weight:600;color:var(--amber)}
+.distractView{min-height:260px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+
+.breathWrap{position:relative;display:flex;align-items:center;justify-content:center;height:240px;width:100%}
+.breathCircle{
+  width:120px;height:120px;border-radius:50%;background:var(--sage-bg);border:2px solid var(--sage);
+  animation:breathe 8s ease-in-out infinite;
+}
+@keyframes breathe{
+  0%{transform:scale(.7)}
+  37.5%{transform:scale(1.15)}
+  50%{transform:scale(1.15)}
+  87.5%{transform:scale(.7)}
+  100%{transform:scale(.7)}
+}
+.breathWord{position:absolute;font-size:13.5px;font-weight:600;color:var(--sage)}
+
+.bubbleTop{display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:8px}
+.bubbleScore{font-family:var(--serif);font-size:20px;font-weight:600}
+.bubbleArea{position:relative;width:100%;height:260px;background:var(--bg);border:1px solid var(--line);border-radius:var(--radius-md);overflow:hidden}
+.bubble{
+  position:absolute;border-radius:50%;border:0;background:var(--amber);opacity:.85;cursor:pointer;
+  animation:pop-in .18s ease-out;
+}
+.bubble:active{transform:scale(.85)}
+@keyframes pop-in{from{transform:scale(0)}to{transform:scale(1)}}
+
 @media(max-width:480px){
   .grid{grid-template-columns:1fr 1fr}
   .primary{width:150px;height:150px;font-size:15px}
@@ -182,6 +224,7 @@ h2{font-family:var(--serif);font-weight:600;font-size:17px;margin:0 0 12px}
           <button id="resist" class="btn good">I resisted</button>
           <button id="acted" class="btn bad">I acted</button>
         </div>
+        <button id="openDistract" class="btn ghost" style="margin-top:10px;width:100%">Need a minute? Try a distraction</button>
       </div>
 
       <div class="small muted hint">Record the urge first. Then choose what happened.</div>
@@ -240,6 +283,35 @@ h2{font-family:var(--serif);font-weight:600;font-size:17px;margin:0 0 12px}
 </div>
 
 </div>
+<div id="distractModal" class="modalOverlay hidden">
+  <div class="modalCard">
+    <div class="modalTop">
+      <div class="modalTabs">
+        <button id="tabBreathe" class="modalTab active">Breathe</button>
+        <button id="tabBubbles" class="modalTab">Bubbles</button>
+      </div>
+      <div id="distractTimer" class="distractTimer">0:60</div>
+    </div>
+
+    <div id="breatheView" class="distractView">
+      <div class="breathWrap">
+        <div id="breathCircle" class="breathCircle"></div>
+        <div id="breathWord" class="breathWord">Breathe in</div>
+      </div>
+    </div>
+
+    <div id="bubbleView" class="distractView hidden">
+      <div class="bubbleTop">
+        <span class="small muted">Pop as many as you can</span>
+        <span id="bubbleScore" class="bubbleScore">0</span>
+      </div>
+      <div id="bubbleArea" class="bubbleArea"></div>
+    </div>
+
+    <button id="closeDistract" class="btn" style="width:100%;margin-top:14px">I'm ready — back to check-in</button>
+  </div>
+</div>
+
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script type="module" src="app.js"></script>
 </body>
