@@ -526,7 +526,8 @@ $("groundNext").onclick=()=>{
 // --- punching bag ---
 let punch={score:0};
 
-$("punchBag").addEventListener("pointerdown",()=>{
+$("punchBag").addEventListener("pointerdown",e=>{
+  e.preventDefault();
   punch.score++;
   $("punchScore").textContent=punch.score;
 
@@ -542,9 +543,10 @@ let slimeDrag=null;
 const clampPct=v=>Math.max(20,Math.min(80,v));
 
 $("slimeBlob").addEventListener("pointerdown",e=>{
+  e.preventDefault();
   slimeDrag={x:e.clientX,y:e.clientY};
   $("slimeBlob").style.transition="none";
-  $("slimeBlob").setPointerCapture(e.pointerId)
+  try{$("slimeBlob").setPointerCapture(e.pointerId)}catch(_){}
 });
 
 $("slimeBlob").addEventListener("pointermove",e=>{
@@ -687,10 +689,14 @@ document.querySelectorAll("nav button").forEach(b=>
       openDistract(true);
       return
     }
+
+    let target=$(b.dataset.tab);
+    if(!target)return; // unknown tab id — don't blank the screen
+
     document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
     b.classList.add("active");
     document.querySelectorAll(".tab").forEach(x=>x.classList.add("hidden"));
-    $(b.dataset.tab).classList.remove("hidden")
+    target.classList.remove("hidden")
   }
 );
 
