@@ -390,15 +390,17 @@ function exportCsv(){
   URL.revokeObjectURL(url)
 }
 
-// --- distraction: breathing pacer + bubble-pop mini game ---
-let distract={timer:null,secondsLeft:60,bubbleTimer:null,score:0};
+// --- distraction: breathing pacer + mini games (also usable standalone) ---
+let distract={timer:null,secondsLeft:60,bubbleTimer:null,score:0,standalone:false};
 
-function openDistract(){
+function openDistract(standalone){
+  distract.standalone=!!standalone;
   distract.secondsLeft=60;
   distract.score=0;
   $("bubbleScore").textContent="0";
   $("bubbleArea").innerHTML="";
   $("distractTimer").textContent="0:60";
+  $("closeDistract").textContent=distract.standalone?"Close":"I'm ready — back to check-in";
   $("distractModal").classList.remove("hidden");
 
   breathWord();
@@ -521,6 +523,53 @@ $("groundNext").onclick=()=>{
   renderGround()
 };
 
+// --- punching bag ---
+let punch={score:0};
+
+$("punchBag").addEventListener("pointerdown",()=>{
+  punch.score++;
+  $("punchScore").textContent=punch.score;
+
+  let bag=$("punchBag");
+  bag.style.setProperty("--tilt",`${(8+Math.random()*10)*(Math.random()<.5?-1:1)}deg`);
+  bag.classList.remove("hit");
+  void bag.offsetWidth; // restart the CSS animation
+  bag.classList.add("hit")
+});
+
+// --- slime blob ---
+let slimeDrag=null;
+const clampPct=v=>Math.max(20,Math.min(80,v));
+
+$("slimeBlob").addEventListener("pointerdown",e=>{
+  slimeDrag={x:e.clientX,y:e.clientY};
+  $("slimeBlob").style.transition="none";
+  $("slimeBlob").setPointerCapture(e.pointerId)
+});
+
+$("slimeBlob").addEventListener("pointermove",e=>{
+  if(!slimeDrag)return;
+
+  let dx=Math.max(-40,Math.min(40,e.clientX-slimeDrag.x));
+  let dy=Math.max(-40,Math.min(40,e.clientY-slimeDrag.y));
+  let blob=$("slimeBlob");
+
+  blob.style.transform=`translate(${dx*.3}px,${dy*.3}px) scale(${1+Math.abs(dx)/260},${1+Math.abs(dy)/260})`;
+  blob.style.borderRadius=
+    `${clampPct(50+dx/2)}% ${clampPct(50-dx/2)}% ${clampPct(50-dy/3)}% ${clampPct(50+dy/3)}% / 55% 45% 55% 45%`
+});
+
+function releaseSlime(){
+  slimeDrag=null;
+  let blob=$("slimeBlob");
+  blob.style.transition="transform .5s cubic-bezier(.34,1.6,.5,1),border-radius .5s ease";
+  blob.style.transform="";
+  blob.style.borderRadius=""
+}
+
+$("slimeBlob").addEventListener("pointerup",releaseSlime);
+$("slimeBlob").addEventListener("pointercancel",releaseSlime);
+
 // --- confirm delay before logging resisted / acted ---
 let confirmState={type:null,timer:null,seconds:0};
 
@@ -634,6 +683,10 @@ $("habitSelect").onchange=async()=>{
 
 document.querySelectorAll("nav button").forEach(b=>
   b.onclick=()=>{
+    if(b.dataset.tab==="relax"){
+      openDistract(true);
+      return
+    }
     document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
     b.classList.add("active");
     document.querySelectorAll(".tab").forEach(x=>x.classList.add("hidden"));

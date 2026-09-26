@@ -39,7 +39,7 @@ header{display:flex;justify-content:space-between;align-items:baseline;margin-bo
 .brand{font-family:var(--serif);font-size:22px;font-weight:600;letter-spacing:-.01em}
 #user{color:var(--muted);font-size:12.5px}
 
-nav{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:var(--card);border:1px solid var(--line);padding:4px;border-radius:999px;margin-bottom:20px}
+nav{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;background:var(--card);border:1px solid var(--line);padding:4px;border-radius:999px;margin-bottom:20px}
 nav button{border:0;background:transparent;border-radius:999px;padding:9px 6px;color:var(--muted);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
 nav button.active{background:var(--ink);color:var(--bg)}
 
@@ -175,6 +175,36 @@ h2{font-family:var(--serif);font-weight:600;font-size:17px;margin:0 0 12px}
 .groundStep{text-align:center;max-width:320px}
 .groundPrompt{font-family:var(--serif);font-size:21px;font-weight:600;margin-top:10px;line-height:1.4}
 
+.punchArea{display:flex;align-items:center;justify-content:center;height:240px}
+.punchBag{
+  width:110px;height:170px;border-radius:50px 50px 60px 60px;
+  background:linear-gradient(160deg,var(--clay),#6e2a21);
+  box-shadow:0 14px 24px -10px rgba(0,0,0,.35),inset -12px -10px 20px rgba(0,0,0,.2);
+  cursor:pointer;transform-origin:top center;position:relative;user-select:none;
+}
+.punchBag::before{
+  content:"";position:absolute;top:-18px;left:50%;transform:translateX(-50%);
+  width:3px;height:20px;background:var(--line);
+}
+.punchBag.hit{animation:punch-hit .45s ease}
+@keyframes punch-hit{
+  0%{transform:rotate(0) scale(1)}
+  30%{transform:rotate(var(--tilt,10deg)) scale(.96)}
+  65%{transform:rotate(calc(var(--tilt,10deg) * -0.55))}
+  100%{transform:rotate(0) scale(1)}
+}
+
+.slimeArea{display:flex;align-items:center;justify-content:center;height:240px}
+.slimeBlob{
+  width:160px;height:130px;
+  background:linear-gradient(155deg,var(--sage),#274a35);
+  border-radius:58% 42% 47% 53%/54% 46% 54% 46%;
+  box-shadow:inset -14px -16px 30px rgba(0,0,0,.18),0 10px 20px -10px rgba(0,0,0,.25);
+  cursor:grab;touch-action:none;
+  transition:transform .5s cubic-bezier(.34,1.6,.5,1),border-radius .5s ease;
+}
+.slimeBlob:active{cursor:grabbing}
+
 @media(max-width:480px){
   .grid{grid-template-columns:1fr 1fr}
   .primary{width:150px;height:150px;font-size:15px}
@@ -210,6 +240,7 @@ h2{font-family:var(--serif);font-weight:600;font-size:17px;margin:0 0 12px}
     <button data-tab="progress">Progress</button>
     <button data-tab="history">History</button>
     <button data-tab="settings">Habits</button>
+    <button data-tab="relax">Relax</button>
   </nav>
 
   <section id="today" class="tab">
@@ -304,6 +335,8 @@ h2{font-family:var(--serif);font-weight:600;font-size:17px;margin:0 0 12px}
         <button data-view="bubbleView" class="modalTab">Bubbles</button>
         <button data-view="puzzleView" class="modalTab">Puzzle</button>
         <button data-view="groundView" class="modalTab">Ground</button>
+        <button data-view="punchView" class="modalTab">Punch</button>
+        <button data-view="slimeView" class="modalTab">Slime</button>
       </div>
       <div id="distractTimer" class="distractTimer">0:60</div>
     </div>
@@ -338,6 +371,23 @@ h2{font-family:var(--serif);font-weight:600;font-size:17px;margin:0 0 12px}
         <div id="groundPrompt" class="groundPrompt"></div>
       </div>
       <button id="groundNext" class="btn" style="margin-top:16px">Next</button>
+    </div>
+
+    <div id="punchView" class="distractView hidden">
+      <div class="bubbleTop">
+        <span class="small muted">Tap to punch</span>
+        <span id="punchScore" class="bubbleScore">0</span>
+      </div>
+      <div class="punchArea">
+        <div id="punchBag" class="punchBag"></div>
+      </div>
+    </div>
+
+    <div id="slimeView" class="distractView hidden">
+      <div class="small muted" style="margin-bottom:10px">Press and drag to squish it around</div>
+      <div class="slimeArea">
+        <div id="slimeBlob" class="slimeBlob"></div>
+      </div>
     </div>
 
     <button id="closeDistract" class="btn" style="width:100%;margin-top:14px">I'm ready — back to check-in</button>
